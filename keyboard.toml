@@ -136,7 +136,7 @@ keys = """
 Tab        Q         W              E             R             T                              Y             U              I               O              P          Quot
 LCtrl      A         MT(S, LCtrl, HRM_RING)  MT(D, LAlt, HRM)  MT(F, LGui, HRM)  G                              H             MT(J, RGui, HRM)  MT(K, RAlt, HRM)  MT(L, RCtrl, HRM_RING)  Semicolon  Minus
 LShift     Z         X              C             V             B      Mute   NO    N             M              Comma           Dot            Slash      Up
-CapsLock   LAlt      LGui           LT(2, Esc, FH)  Space      TH(LANG2, LShift, FH)         TH(LANG1, RShift, FH)  LT(4, Bksp, FH)  LT(1, Enter, FH)  Left           Down       Right
+CapsLock   LAlt      LGui           LT(2, Esc, FH)  Space      TH(Language2, LShift, FH)         TH(Language1, RShift, FH)  LT(4, Backspace, FH)  LT(1, Enter, FH)  Left           Down       Right
 """
 encoders = [["AudioVolDown", "AudioVolUp"], ["MouseWheelDown", "MouseWheelUp"]]
 
