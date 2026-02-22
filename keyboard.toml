@@ -294,33 +294,15 @@ gap_timeout = "250ms"
 #   - enable_flow_tap + prior_idle_time: 高速タイピング中の誤Hold防止
 #   - permissive_hold: Hold中に別キーtapで即Hold確定
 #   - unilateral_tap: 同じ手のキー押下で即tap（matrix_mapのL/Rで判定）
-HRM = {
-enable_flow_tap = true,
-prior_idle_time = "150ms",
-permissive_hold = true,
-unilateral_tap = true,
-hold_timeout = "280ms",
-gap_timeout = "280ms"
-}
+HRM = { enable_flow_tap = true, prior_idle_time = "150ms", permissive_hold = true, unilateral_tap = true, hold_timeout = "280ms", gap_timeout = "280ms" }
 
 # HRM_RING: 薬指用（反応が遅いため hold_timeout を長めに）
-HRM_RING = {
-enable_flow_tap = true,
-prior_idle_time = "150ms",
-permissive_hold = true,
-unilateral_tap = true,
-hold_timeout = "300ms",
-gap_timeout = "300ms"
-}
+HRM_RING = { enable_flow_tap = true, prior_idle_time = "150ms", permissive_hold = true, unilateral_tap = true, hold_timeout = "300ms", gap_timeout = "300ms" }
 
 # FH: 親指キー用（Layer Tap / Shift-LANG 切替）
 #   - hold_on_other_press: 他キー押下で即Hold（Shift/Layerは遅延なく効いてほしい）
 #   - unilateral_tap 不要（親指は bilateral の問題がない）
-FH = {
-hold_on_other_press = true,
-hold_timeout = "200ms",
-gap_timeout = "200ms"
-}
+FH = { hold_on_other_press = true, hold_timeout = "200ms", gap_timeout = "200ms" }
 
 # ────────────────────────────────────────────────
 # Fork — 修飾キー状態で出力を切り替え
@@ -332,10 +314,7 @@ gap_timeout = "200ms"
 [behavior.fork]
 forks = [
     # Shift + . で : を出力（Vim コマンド、時刻入力に便利）
-    { trigger = "Dot", negative_output = "Dot",
-    positive_output = "WM(Semicolon, LShift)", match_any = "LShift|RShift" },
-
+    { trigger = "Dot", negative_output = "Dot", positive_output = "WM(Semicolon, LShift)", match_any = "LShift|RShift" },
     # Shift + , で ; を出力（プログラミングで頻出）
-    { trigger = "Comma", negative_output = "Comma",
-    positive_output = "Semicolon", match_any = "LShift|RShift" },
+    { trigger = "Comma", negative_output = "Comma", positive_output = "Semicolon", match_any = "LShift|RShift" },
 ]
