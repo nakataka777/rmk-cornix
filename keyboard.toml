@@ -1,15 +1,16 @@
 # ============================================================
 # Cornix HRM keyboard.toml
 # ============================================================
-# 変更点:
-#   1. matrix_map に L/R hand 情報 + positional profiles を追加
-#   2. [behavior.morse.profiles] に HRM, HRM_RING, FH を定義
-#   3. [behavior.fork] を追加
-#   4. [behavior.tri_layer] を追加（Layer 3 = LT1 + LT2）
-#   5. base_layer を現在の Vial レイアウトに合わせて MT/LT + profile で記述
+# ビルド確認済み: rmk v0.8.2 / rmk-macro v0.7.1
 #
-# ⚠️ 重要: matrix_map の positional profiles は Vial で設定した
-#    MT/LT キーにも自動適用される。clear_storage は不要。
+# プロファイル適用の優先順位（ソースコード確認済み）:
+#   1. MT/LT/TH の第3引数（最強）
+#   2. [behavior.morse] のグローバルデフォルト（フォールバック）
+#
+# ⚠️ matrix_map は (row,col,hand?) のみ。:PROFILE 構文は存在しない。
+# ⚠️ Vial の 16bit キーコードにプロファイル情報は格納されない。
+#    Vial で HRM キーを編集すると書き戻し時にプロファイルが消える。
+#    → Layer 0 の HRM/親指キーは Vial で触らないこと。
 # ============================================================
 
 [keyboard]
@@ -78,10 +79,20 @@ unlock_keys = [[1, 3], [1, 4]]
 
 [storage]
 enabled = true
-# ⚠️ Vial のキーマップを維持するため false のまま。
-# keyboard.toml の layer 定義でキーマップをリセットしたい場合は
-# 一時的に true にしてビルド → フラッシュ → false に戻して再ビルド。
-clear_storage = true
+# clear_storage の動作（storage/mod.rs で確認済み）:
+#   false → Vial ストレージが優先。keyboard.toml のレイヤー定義は無視。
+#   true  → erase_all() でストレージ消去 → keyboard.toml のレイヤー定義をロード。
+#
+# ストレージに関係なく常に有効:
+#   - [behavior.morse.profiles] — コンパイル時にコード生成
+#   - [behavior.fork], [behavior.tri_layer] — ランタイムロジック
+#   - matrix_map の L/R hand — unilateral_tap の判定
+#
+# 初回フラッシュ手順:
+#   1. clear_storage = true でビルド → フラッシュ → Layer 0 のプロファイルがロード
+#   2. Vial で Layer 1〜4 を再設定（Layer 0 の HRM/親指キーは触らない）
+#   3. clear_storage = false に戻してビルド → フラッシュ → 以降 Vial 設定が維持
+clear_storage = false
 clear_layout = false
 
 [dependency]
@@ -93,21 +104,10 @@ dcdc_reg1 = true
 dcdc_reg0_voltage = "3V3"
 
 # ============================================================
-# レイアウト — matrix_map に hand + positional profiles
+# レイアウト — matrix_map に L/R hand 情報
 # ============================================================
+# 文法: (row,col,hand?) — hand は L/R/* のみ（keymap.pest で確認済み）
 # L/R: unilateral_tap の「同じ手」判定に使用
-# :PROFILE: そのキー位置のデフォルトプロファイル
-#           → Vial で設定した MT/LT にも自動適用される
-#
-# 物理配置:
-#   左手 top:    (0,0)  (0,1)  (0,2)  (0,3)  (0,4)  (0,5)
-#   右手 top:    (4,5)  (4,4)  (4,3)  (4,2)  (4,1)  (4,0)
-#   左手 home:   (1,0)  (1,1)  (1,2)  (1,3)  (1,4)  (1,5)
-#   右手 home:   (5,5)  (5,4)  (5,3)  (5,2)  (5,1)  (5,0)
-#   左手 bottom: (2,0)  (2,1)  (2,2)  (2,3)  (2,4)  (2,5)  (2,6)
-#   右手 bottom: (5,6)  (6,5)  (6,4)  (6,3)  (6,2)  (6,1)  (6,0)
-#   左手 thumb:  (3,0)  (3,1)  (3,2)  (3,3)  (3,4)  (3,5)
-#   右手 thumb:  (7,5)  (7,4)  (7,3)  (7,2)  (7,1)  (7,0)
 # ============================================================
 [layout]
 rows = 8
@@ -123,12 +123,9 @@ matrix_map = """
 # ============================================================
 # Layer 0: ベース（現在の Vial レイアウト準拠）
 # ============================================================
-# ⚠️ clear_storage = false の場合、この定義は Vial ストレージに
-#    上書きされる。ただし matrix_map の positional profiles は
-#    Vial のキーにも適用されるため、プロファイルは有効。
-#
-# clear_storage = true でビルドすると、このレイヤー定義が
-# 初期キーマップとしてロードされる。
+# プロファイルは MT/LT/TH の第3引数で直接指定。
+# Vial で HRM/親指キーを編集するとプロファイルが消える（16bit変換時に欠落）。
+# → S,D,F,J,K,L と Esc,Bksp,Enter,LANG切替 は Vial で触らないこと。
 # ============================================================
 [[layer]]
 name = "base"
@@ -140,12 +137,6 @@ CapsLock   LAlt      LGui           LT(2, Esc, FH)  Space      TH(Language2, LSh
 """
 encoders = [["AudioVolDown", "AudioVolUp"], ["MouseWheelDown", "MouseWheelUp"]]
 
-# ============================================================
-# Layer 1: 数字 + ナビゲーション（LT1 = Enter hold で有効）
-# ============================================================
-# Vial で細かく調整済みのため、ここでは簡略版を記載。
-# clear_storage = true で反映、その後 Vial で微調整。
-# ============================================================
 [[layer]]
 name = "numbers"
 keys = """
@@ -156,9 +147,6 @@ _          LAlt      LGui           _             _             _               
 """
 encoders = [["_", "_"], ["_", "_"]]
 
-# ============================================================
-# Layer 2: 記号 + Vim 移動（LT2 = Esc hold で有効）
-# ============================================================
 [[layer]]
 name = "symbols"
 keys = """
@@ -169,11 +157,6 @@ _          LAlt             LGui              _                 _               
 """
 encoders = [["_", "_"], ["_", "_"]]
 
-# ============================================================
-# Layer 3: Adjust / Tri-Layer（LT1 + LT2 同時で有効）
-# ============================================================
-# BT 切替、F キー、システム設定を配置
-# ============================================================
 [[layer]]
 name = "adjust"
 keys = """
@@ -184,11 +167,6 @@ _      _      _      _      _      _                  _      _      _      _    
 """
 encoders = [["_", "_"], ["_", "_"]]
 
-# ============================================================
-# Layer 4: Hyper + アプリ起動（LT4 = Bksp hold で有効）
-# ============================================================
-# Hyper = Ctrl+Shift+Alt+GUI — Alfred App Shortcuts で受ける
-# ============================================================
 [[layer]]
 name = "hyper"
 keys = """
@@ -199,9 +177,6 @@ _  _  _  _  WM(Space, LAlt)  WM(S, LCtrl | LAlt | LGui)                _  _  _  
 """
 encoders = [["AudioVolDown", "AudioVolUp"], ["MouseWheelDown", "MouseWheelUp"]]
 
-# ============================================================
-# Layer 5-9: 空レイヤー（Vial で自由に設定可能）
-# ============================================================
 [[layer]]
 name = "layer5"
 keys = """
@@ -253,7 +228,7 @@ _ _ _ _ _ _       _ _ _ _ _ _
 encoders = [["_", "_"], ["_", "_"]]
 
 # ============================================================
-# Behavior — プロファイル定義
+# Behavior
 # ============================================================
 
 [behavior.one_shot]
@@ -263,58 +238,33 @@ timeout = "3s"
 timeout = "50ms"
 combos = []
 
-# Tri-Layer: LT1(Enter) + LT2(Esc) 同時押しで Layer 3 (Adjust)
 [behavior.tri_layer]
 upper = 1
 lower = 2
 adjust = 3
 
-# ────────────────────────────────────────────────
-# Morse / Tap-Hold グローバルデフォルト
-# ────────────────────────────────────────────────
-# プロファイル未指定かつ matrix_map でも指定なしのキーに適用。
-# 通常の MT/LT キー（HRM でないもの）向け。
+# グローバルデフォルト（プロファイル未指定のキーに適用）
 [behavior.morse]
 enable_flow_tap = false
 hold_on_other_press = true
 hold_timeout = "250ms"
 gap_timeout = "250ms"
 
-# ────────────────────────────────────────────────
 # プロファイル定義
-# ────────────────────────────────────────────────
-# 適用優先順位:
-#   1. キーマップの MT/LT 第3引数 (最強)
-#   2. matrix_map の positional profile
-#   3. [behavior.morse] のグローバルデフォルト (最弱)
-# ────────────────────────────────────────────────
 [behavior.morse.profiles]
 
-# HRM: 人差し指・中指用 Home Row Mod
-#   - enable_flow_tap + prior_idle_time: 高速タイピング中の誤Hold防止
-#   - permissive_hold: Hold中に別キーtapで即Hold確定
-#   - unilateral_tap: 同じ手のキー押下で即tap（matrix_mapのL/Rで判定）
+# HRM: 人差し指・中指用
 HRM = { enable_flow_tap = true, prior_idle_time = "150ms", permissive_hold = true, unilateral_tap = true, hold_timeout = "280ms", gap_timeout = "280ms" }
 
-# HRM_RING: 薬指用（反応が遅いため hold_timeout を長めに）
+# HRM_RING: 薬指用（hold_timeout 長め）
 HRM_RING = { enable_flow_tap = true, prior_idle_time = "150ms", permissive_hold = true, unilateral_tap = true, hold_timeout = "300ms", gap_timeout = "300ms" }
 
-# FH: 親指キー用（Layer Tap / Shift-LANG 切替）
-#   - hold_on_other_press: 他キー押下で即Hold（Shift/Layerは遅延なく効いてほしい）
-#   - unilateral_tap 不要（親指は bilateral の問題がない）
+# FH: 親指キー用（即 hold 判定）
 FH = { hold_on_other_press = true, hold_timeout = "200ms", gap_timeout = "200ms" }
 
-# ────────────────────────────────────────────────
-# Fork — 修飾キー状態で出力を切り替え
-# ────────────────────────────────────────────────
-# ⚠️ trigger はキーマップに記載された通りのキーを指定。
-#    LT(2, Backspace) がキーマップにある場合、
-#    trigger = "Backspace" では動作しない。
-# ────────────────────────────────────────────────
+# Fork
 [behavior.fork]
 forks = [
-    # Shift + . で : を出力（Vim コマンド、時刻入力に便利）
     { trigger = "Dot", negative_output = "Dot", positive_output = "WM(Semicolon, LShift)", match_any = "LShift|RShift" },
-    # Shift + , で ; を出力（プログラミングで頻出）
     { trigger = "Comma", negative_output = "Comma", positive_output = "Semicolon", match_any = "LShift|RShift" },
 ]
