@@ -254,10 +254,10 @@ gap_timeout = "250ms"
 [behavior.morse.profiles]
 
 # HRM: 人差し指・中指用
-HRM = { enable_flow_tap = true, prior_idle_time = "150ms", permissive_hold = true, unilateral_tap = true, hold_timeout = "280ms", gap_timeout = "280ms" }
+HRM = { enable_flow_tap = true, prior_idle_time = "100ms", permissive_hold = true, unilateral_tap = true, hold_timeout = "280ms", gap_timeout = "280ms" }
 
 # HRM_RING: 薬指用（hold_timeout 長め）
-HRM_RING = { enable_flow_tap = true, prior_idle_time = "150ms", permissive_hold = true, unilateral_tap = true, hold_timeout = "300ms", gap_timeout = "300ms" }
+HRM_RING = { enable_flow_tap = true, prior_idle_time = "100ms", permissive_hold = true, unilateral_tap = true, hold_timeout = "300ms", gap_timeout = "300ms" }
 
 # FH: 親指キー用（即 hold 判定）
 FH = { hold_on_other_press = true, hold_timeout = "200ms", gap_timeout = "200ms" }
