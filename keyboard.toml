@@ -264,7 +264,4 @@ FH = { hold_on_other_press = true, hold_timeout = "200ms", gap_timeout = "200ms"
 
 # Fork
 [behavior.fork]
-forks = [
-    { trigger = "Dot", negative_output = "Dot", positive_output = "WM(Semicolon, LShift)", match_any = "LShift|RShift" },
-    { trigger = "Comma", negative_output = "Comma", positive_output = "Semicolon", match_any = "LShift|RShift" },
-]
+forks = []
