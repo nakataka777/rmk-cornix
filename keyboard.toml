@@ -81,7 +81,7 @@ enabled = true
 # ⚠️ Vial のキーマップを維持するため false のまま。
 # keyboard.toml の layer 定義でキーマップをリセットしたい場合は
 # 一時的に true にしてビルド → フラッシュ → false に戻して再ビルド。
-clear_storage = false
+clear_storage = true
 clear_layout = false
 
 [dependency]
